@@ -4,6 +4,7 @@ const STORAGE_KEY = 'monsterDecks';
 let decks = [];
 let editingDeck = null;
 let editingIndex = null;
+let selectingSlot = null;
 let cardsData = [];
 let gameState = null;
 
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   views.select = document.getElementById('view-deckselect');
   views.game = document.getElementById('view-game');
   views.settings = document.getElementById('view-settings');
+  views.cardselect = document.getElementById("view-cardselect");
 
   // buttons
   document.getElementById('btn-singleplayer').addEventListener('click', startSingleplayer);
@@ -36,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-back-menu-game').addEventListener('click', () => showView('menu'));
   document.getElementById('btn-back-settings').addEventListener('click', () => showView('menu'));
 
+  document.getElementById('btn-back-cardselect').addEventListener('click', () => openEditor(editingIndex));
   fetch('data/cards.json').then(r => r.json()).then(d => { cardsData = d; });
   loadDecks();
   renderDeckList();
@@ -99,11 +102,26 @@ function openEditor(index) {
 }
 
 function selectCardForSlot(i) {
-  const id = prompt(`Inserisci ID carta per slot ${i+1}`);
-  if (id) {
-    editingDeck[i] = parseInt(id);
-    openEditor(editingIndex);
-  }
+  selectingSlot = i;
+  const list = document.getElementById('cards-list');
+  list.innerHTML = '';
+  cardsData.forEach(card => {
+    const li = document.createElement('li');
+    const img = document.createElement('img');
+    img.src = 'assets/cards/placeholder.png';
+    img.alt = card.nome;
+    const name = document.createElement('span');
+    name.textContent = card.nome;
+    li.appendChild(img);
+    li.appendChild(name);
+    li.title = cardInfo(card);
+    li.addEventListener('click', () => {
+      editingDeck[selectingSlot] = card.id;
+      openEditor(editingIndex);
+    });
+    list.appendChild(li);
+  });
+  showView('cardselect');
 }
 
 function saveDeck() {
