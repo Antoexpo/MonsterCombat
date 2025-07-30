@@ -1,54 +1,36 @@
-// app.js
+// Monster Combat client logic
 
-// Views
-const views = {
-  menu: document.getElementById('view-menu'),
-  decks: document.getElementById('view-decks'),
-  game: document.getElementById('view-game'),
-  settings: document.getElementById('view-settings')
-};
-
-// Menu buttons
-const btnSingle = document.getElementById('btn-singleplayer');
-const btnMulti = document.getElementById('btn-multiplayer');
-const btnDecks = document.getElementById('btn-decks');
-const btnSettings = document.getElementById('btn-settings');
-
-// Deck manager elements
-const decksList = document.getElementById('decks-list');
-const btnCreateDeck = document.getElementById('btn-create-deck');
-const deckEditor = document.getElementById('deck-editor');
-const deckSlots = document.querySelectorAll('#deck-cards li');
-const btnSaveDeck = document.getElementById('btn-save-deck');
-const btnCancelEdit = document.getElementById('btn-cancel-edit');
-const btnBackMenu = document.getElementById('btn-back-menu');
-
-// Game back button
-const btnBackGame = document.getElementById('btn-back-menu-game');
-
-// Data
-let decks = []; // array of decks, each is array of 4 card IDs
-let currentDeckIndex = null;
+const STORAGE_KEY = 'monsterDecks';
+let decks = [];
 let editingDeck = null;
+let editingIndex = null;
 
-// Initialize
+const views = {};
+
+// DOM ready
 document.addEventListener('DOMContentLoaded', () => {
+  views.menu = document.getElementById('view-menu');
+  views.decks = document.getElementById('view-decks');
+  views.editor = document.getElementById('view-editor');
+  views.game = document.getElementById('view-game');
+  views.settings = document.getElementById('view-settings');
+
+  // buttons
+  document.getElementById('btn-singleplayer').addEventListener('click', startSingleplayer);
+  document.getElementById('btn-multiplayer').addEventListener('click', () => alert('Modalit\u00e0 multiplayer in sviluppo'));
+  document.getElementById('btn-decks').addEventListener('click', () => showView('decks'));
+  document.getElementById('btn-settings').addEventListener('click', () => showView('settings'));
+  document.getElementById('btn-create-deck').addEventListener('click', () => openEditor(null));
+  document.getElementById('btn-save-deck').addEventListener('click', saveDeck);
+  document.getElementById('btn-cancel-edit').addEventListener('click', () => { showView('decks'); });
+  document.getElementById('btn-back-menu').addEventListener('click', () => showView('menu'));
+  document.getElementById('btn-back-menu-game').addEventListener('click', () => showView('menu'));
+  document.getElementById('btn-back-settings').addEventListener('click', () => showView('menu'));
+
   loadDecks();
-  bindMenu();
+  renderDeckList();
   showView('menu');
 });
-
-function bindMenu() {
-  btnSingle.addEventListener('click', () => startSingleplayer());
-  btnMulti.addEventListener('click', () => alert('Multiplayer in sviluppo'));  
-  btnDecks.addEventListener('click', () => showView('decks'));
-  btnSettings.addEventListener('click', () => showView('settings'));
-  btnBackMenu.addEventListener('click', () => showView('menu'));
-  btnBackGame.addEventListener('click', () => showView('menu'));
-  btnCreateDeck.addEventListener('click', () => openDeckEditor(null));
-  btnSaveDeck.addEventListener('click', saveDeck);
-  btnCancelEdit.addEventListener('click', () => openDeckEditor(null));
-}
 
 function showView(name) {
   Object.values(views).forEach(v => v.classList.add('hidden'));
@@ -56,79 +38,76 @@ function showView(name) {
   if (name === 'decks') renderDeckList();
 }
 
-// Decks: load and save
 function loadDecks() {
-  const data = localStorage.getItem('monsterDecks');
+  const data = localStorage.getItem(STORAGE_KEY);
   decks = data ? JSON.parse(data) : [];
 }
 
-function saveDecksToStorage() {
-  localStorage.setItem('monsterDecks', JSON.stringify(decks));
+function saveDecks() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(decks));
 }
 
 function renderDeckList() {
-  decksList.innerHTML = '';
-  decks.forEach((deck, idx) => {
+  const list = document.getElementById('decks-list');
+  list.innerHTML = '';
+  decks.forEach((deck, i) => {
     const li = document.createElement('li');
-    li.textContent = `Mazzo ${idx + 1}`;
-    const btnEdit = document.createElement('button'); btnEdit.textContent = 'Modifica';
-    const btnDelete = document.createElement('button'); btnDelete.textContent = 'Elimina';
-    btnEdit.addEventListener('click', () => openDeckEditor(idx));
-    btnDelete.addEventListener('click', () => { decks.splice(idx,1); saveDecksToStorage(); renderDeckList(); });
-    li.append(btnEdit, btnDelete);
-    decksList.append(li);
+    li.textContent = `Mazzo ${i + 1}`;
+    const edit = document.createElement('button');
+    edit.textContent = 'Modifica';
+    edit.addEventListener('click', () => openEditor(i));
+    const del = document.createElement('button');
+    del.textContent = 'Elimina';
+    del.addEventListener('click', () => { decks.splice(i,1); saveDecks(); renderDeckList(); });
+    li.append(edit, del);
+    list.appendChild(li);
   });
-  btnCreateDeck.disabled = decks.length >= 4;
+  document.getElementById('btn-create-deck').disabled = decks.length >= 4;
 }
 
-function openDeckEditor(idx) {
-  deckEditor.classList.toggle('hidden', idx === null);
-  document.querySelector('.deck-list').classList.toggle('hidden', idx !== null);
-  if (idx === null) {
-    editingDeck = [null,null,null,null]; currentDeckIndex = null;
-  } else {
-    editingDeck = [...decks[idx]]; currentDeckIndex = idx;
-  }
-  deckSlots.forEach((slot, i) => {
+function openEditor(index) {
+  showView('editor');
+  editingIndex = index;
+  editingDeck = index != null ? [...decks[index]] : [null,null,null,null];
+  const slots = document.querySelectorAll('#deck-cards li');
+  slots.forEach((slot,i) => {
     slot.textContent = editingDeck[i] || `Slot ${i+1}`;
     slot.onclick = () => selectCardForSlot(i);
   });
 }
 
-function selectCardForSlot(slotIndex) {
-  const cardId = prompt('Inserisci ID carta per slot ' + (slotIndex+1));
-  if (cardId) editingDeck[slotIndex] = parseInt(cardId);
-  deckSlots[slotIndex].textContent = editingDeck[slotIndex] || `Slot ${slotIndex+1}`;
+function selectCardForSlot(i) {
+  const id = prompt(`Inserisci ID carta per slot ${i+1}`);
+  if (id) {
+    editingDeck[i] = parseInt(id);
+    document.querySelectorAll('#deck-cards li')[i].textContent = editingDeck[i];
+  }
 }
 
 function saveDeck() {
   if (editingDeck.some(id => id == null)) {
-    alert('Completa tutti e 4 i slot!'); return;
+    alert('Completa tutti gli slot prima di salvare');
+    return;
   }
-  if (currentDeckIndex === null) decks.push(editingDeck);
-  else decks[currentDeckIndex] = editingDeck;
-  saveDecksToStorage();
-  openDeckEditor(null);
+  if (editingIndex == null) decks.push(editingDeck);
+  else decks[editingIndex] = editingDeck;
+  saveDecks();
+  showView('decks');
   renderDeckList();
 }
 
-// Singleplayer start
 function startSingleplayer() {
-  if (decks.length === 0) { alert('Crea almeno un mazzo prima'); return; }
-  // per ora prendi il primo mazzo
+  if (decks.length === 0) {
+    alert('Devi creare almeno un mazzo');
+    showView('decks');
+    return;
+  }
   const deck = decks[0];
-  // salva deck selezionato e poi init game
-  selectedDeck = deck;
-  // Inizializza il gioco con il mazzo
   initGameWithDeck(deck);
   showView('game');
 }
 
-// Placeholder: inserire qui la logica di gioco già scritta (fetch, shuffle, round, ecc.)
+// hook for real game logic
 function initGameWithDeck(deck) {
-  console.log('Inizio partita con mazzo:', deck);
-  // TODO: sostituire playerDeck con deck caricato
+  console.log('Avvio partita con mazzo:', deck);
 }
-
-// A questo punto potrai inserire la logica di gioco già pronta per utilizzare il mazzo selezionato
-
