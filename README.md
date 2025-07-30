@@ -6,9 +6,7 @@ Clone web in stile Urban Rivals utilizzando asset generati da AI.
 
 ```
 assets/
-  background/        # (eventuali sfondi)
   cards/             # immagini delle carte
-  icon/              # icone varie
   ui/                # icone per i menu e banner
 data/
   cards.json         # dati di esempio delle carte
