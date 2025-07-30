@@ -9,57 +9,79 @@
 <body>
   <div id="app">
 
-    <!-- HEADER -->
-    <header class="app-header">
-      <h1>GAME MODES</h1>
-      <p class="subtitle">Ua fratmò clicca su uno di sti tasti</p>
-    </header>
-
-    <!-- VIEW: MENU PRINCIPALE (Game Modes) -->
-    <section id="view-menu" class="view active modes-view">
+    <section id="view-menu" class="view">
+      <header class="app-header">
+        <h1>Game Modes</h1>
+        <p class="subtitle">Scegli cosa vuoi fare</p>
+      </header>
       <div class="modes-container">
         <button class="mode-card" id="btn-singleplayer">
-          <div class="card-banner">Singleplayer</div>
-          <div class="card-image">
-            <img src="assets/ui/icon_single.png" alt="Singleplayer">
-          </div>
-          <div class="card-footer">Offline PvE</div>
+          <span class="card-banner">Singleplayer</span>
+          <span class="card-image"><img src="assets/ui/icon_single.png" alt="Singleplayer"></span>
+          <span class="card-footer">Offline PvE</span>
         </button>
         <button class="mode-card" id="btn-multiplayer">
-          <div class="card-banner">Multiplayer</div>
-          <div class="card-image">
-            <img src="assets/ui/icon_multi.png" alt="Multiplayer">
-          </div>
-          <div class="card-footer">Online PvP</div>
+          <span class="card-banner">Multiplayer</span>
+          <span class="card-image"><img src="assets/ui/icon_multi.png" alt="Multiplayer"></span>
+          <span class="card-footer">Online PvP</span>
         </button>
-        <button class="mode-card" id="btn-decks-main">
-          <div class="card-banner">Mazzi</div>
-          <div class="card-image">
-            <img src="assets/ui/icon_deck.png" alt="Mazzi">
-          </div>
-          <div class="card-footer">Gestisci i tuoi deck</div>
+        <button class="mode-card" id="btn-decks">
+          <span class="card-banner">Mazzi</span>
+          <span class="card-image"><img src="assets/ui/icon_deck.png" alt="Mazzi"></span>
+          <span class="card-footer">Gestisci i tuoi deck</span>
         </button>
-        <button class="mode-card" id="btn-settings-main">
-          <div class="card-banner">Impostazioni</div>
-          <div class="card-image">
-            <img src="assets/ui/icon_settings.png" alt="Impostazioni">
-          </div>
-          <div class="card-footer">Opzioni del gioco</div>
+        <button class="mode-card" id="btn-settings">
+          <span class="card-banner">Impostazioni</span>
+          <span class="card-image"><img src="assets/ui/icon_settings.png" alt="Settings"></span>
+          <span class="card-footer">Opzioni di gioco</span>
         </button>
       </div>
     </section>
 
-    <!-- VIEW: SINGLEPLAYER -->
-    <section id="view-single" class="view hidden"></section>
+    <section id="view-decks" class="view hidden">
+      <header class="view-header">
+        <h2>Mazzi</h2>
+        <button id="btn-back-menu" class="back-button">Menu</button>
+      </header>
+      <ul id="decks-list" class="deck-list"></ul>
+      <button id="btn-create-deck" class="primary">Nuovo Mazzo</button>
+    </section>
 
-    <!-- VIEW: GESTIONE MAZZI -->
-    <section id="view-decks" class="view hidden"></section>
+    <section id="view-editor" class="view hidden">
+      <header class="view-header">
+        <h2>Editor Mazzo</h2>
+      </header>
+      <ul id="deck-cards" class="editor-cards">
+        <li>Slot 1</li>
+        <li>Slot 2</li>
+        <li>Slot 3</li>
+        <li>Slot 4</li>
+      </ul>
+      <div class="editor-actions">
+        <button id="btn-save-deck" class="primary">Salva</button>
+        <button id="btn-cancel-edit">Annulla</button>
+      </div>
+    </section>
 
-    <!-- VIEW: EDITOR MAZZO -->
-    <section id="view-deck-editor" class="view hidden"></section>
+    <section id="view-game" class="view hidden">
+      <header class="view-header">
+        <h2>Partita</h2>
+        <button id="btn-back-menu-game" class="back-button">Abbandona</button>
+      </header>
+      <div class="game-area">
+        <!-- la logica di gioco sarà caricata qui -->
+      </div>
+    </section>
 
-    <!-- VIEW: IMPOSTAZIONI -->
-    <section id="view-settings" class="view hidden"></section>
+    <section id="view-settings" class="view hidden">
+      <header class="view-header">
+        <h2>Impostazioni</h2>
+        <button id="btn-back-settings" class="back-button">Menu</button>
+      </header>
+      <div class="settings-content">
+        <p>Presto disponibili...</p>
+      </div>
+    </section>
 
   </div>
 
