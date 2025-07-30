@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monster Combat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+
+    <!-- HEADER -->
+    <header class="app-header">
+      <h1>GAME MODES</h1>
+      <p class="subtitle">Ua fratmò clicca su uno di sti tasti</p>
+    </header>
+
+    <!-- VIEW: MENU PRINCIPALE (Game Modes) -->
+    <section id="view-menu" class="view active modes-view">
+      <div class="modes-container">
+        <button class="mode-card" id="btn-singleplayer">
+          <div class="card-banner">Singleplayer</div>
+          <div class="card-image">
+            <img src="assets/ui/icon_single.png" alt="Singleplayer">
+          </div>
+          <div class="card-footer">Offline PvE</div>
+        </button>
+        <button class="mode-card" id="btn-multiplayer">
+          <div class="card-banner">Multiplayer</div>
+          <div class="card-image">
+            <img src="assets/ui/icon_multi.png" alt="Multiplayer">
+          </div>
+          <div class="card-footer">Online PvP</div>
+        </button>
+        <button class="mode-card" id="btn-decks-main">
+          <div class="card-banner">Mazzi</div>
+          <div class="card-image">
+            <img src="assets/ui/icon_deck.png" alt="Mazzi">
+          </div>
+          <div class="card-footer">Gestisci i tuoi deck</div>
+        </button>
+        <button class="mode-card" id="btn-settings-main">
+          <div class="card-banner">Impostazioni</div>
+          <div class="card-image">
+            <img src="assets/ui/icon_settings.png" alt="Impostazioni">
+          </div>
+          <div class="card-footer">Opzioni del gioco</div>
+        </button>
+      </div>
+    </section>
+
+    <!-- VIEW: SINGLEPLAYER -->
+    <section id="view-single" class="view hidden"></section>
+
+    <!-- VIEW: GESTIONE MAZZI -->
+    <section id="view-decks" class="view hidden"></section>
+
+    <!-- VIEW: EDITOR MAZZO -->
+    <section id="view-deck-editor" class="view hidden"></section>
+
+    <!-- VIEW: IMPOSTAZIONI -->
+    <section id="view-settings" class="view hidden"></section>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
