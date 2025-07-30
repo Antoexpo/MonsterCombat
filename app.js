@@ -185,7 +185,13 @@ function renderGame() {
       if (!card.used) {
         const li = document.createElement('li');
         const btn = document.createElement('button');
-        btn.textContent = `${card.nome} (P:${card.potenza} D:${card.danno})`;
+        const img = document.createElement('img');
+        img.src = `assets/cards/${card.immagine || 'placeholder.png'}`;
+        img.alt = card.nome;
+        const label = document.createElement('span');
+        label.textContent = `${card.nome} (P:${card.potenza} D:${card.danno})`;
+        btn.appendChild(img);
+        btn.appendChild(label);
         btn.addEventListener('click', () => selectCard(idx, i));
         li.appendChild(btn);
         ul.appendChild(li);
