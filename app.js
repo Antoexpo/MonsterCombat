@@ -7,6 +7,10 @@ let editingIndex = null;
 let cardsData = [];
 let gameState = null;
 
+function cardInfo(card) {
+  return `${card.nome} - Potenza ${card.potenza}, Danno ${card.danno}, Abilità: ${card['abilità']}, Clan: ${card.clan}, Bonus: ${card.bonus}, Stelle: ${card.star}`;
+}
+
 const views = {};
 
 // DOM ready
@@ -77,7 +81,19 @@ function openEditor(index) {
   editingDeck = index != null ? [...decks[index]] : [null,null,null,null];
   const slots = document.querySelectorAll('#deck-cards li');
   slots.forEach((slot,i) => {
-    slot.textContent = editingDeck[i] || `Slot ${i+1}`;
+    slot.innerHTML = '';
+    const id = editingDeck[i];
+    if (id) {
+      const card = cardsData.find(c => c.id === id);
+      const img = document.createElement('img');
+      img.src = 'assets/cards/placeholder.png';
+      img.alt = card.nome;
+      slot.appendChild(img);
+      slot.title = cardInfo(card);
+    } else {
+      slot.textContent = `Slot ${i+1}`;
+      slot.title = '';
+    }
     slot.onclick = () => selectCardForSlot(i);
   });
 }
@@ -86,7 +102,7 @@ function selectCardForSlot(i) {
   const id = prompt(`Inserisci ID carta per slot ${i+1}`);
   if (id) {
     editingDeck[i] = parseInt(id);
-    document.querySelectorAll('#deck-cards li')[i].textContent = editingDeck[i];
+    openEditor(editingIndex);
   }
 }
 
@@ -186,12 +202,13 @@ function renderGame() {
         const li = document.createElement('li');
         const btn = document.createElement('button');
         const img = document.createElement('img');
-        img.src = `assets/cards/${card.immagine || 'placeholder.png'}`;
+        img.src = 'assets/cards/placeholder.png';
         img.alt = card.nome;
         const label = document.createElement('span');
         label.textContent = `${card.nome} (P:${card.potenza} D:${card.danno})`;
         btn.appendChild(img);
         btn.appendChild(label);
+        btn.title = cardInfo(card);
         btn.addEventListener('click', () => selectCard(idx, i));
         li.appendChild(btn);
         ul.appendChild(li);
