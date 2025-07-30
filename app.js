@@ -4,6 +4,8 @@ const STORAGE_KEY = 'monsterDecks';
 let decks = [];
 let editingDeck = null;
 let editingIndex = null;
+let cardsData = [];
+let gameState = null;
 
 const views = {};
 
@@ -12,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   views.menu = document.getElementById('view-menu');
   views.decks = document.getElementById('view-decks');
   views.editor = document.getElementById('view-editor');
+  views.select = document.getElementById('view-deckselect');
   views.game = document.getElementById('view-game');
   views.settings = document.getElementById('view-settings');
 
@@ -24,9 +27,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-save-deck').addEventListener('click', saveDeck);
   document.getElementById('btn-cancel-edit').addEventListener('click', () => { showView('decks'); });
   document.getElementById('btn-back-menu').addEventListener('click', () => showView('menu'));
+  document.getElementById('btn-cancel-deckselect').addEventListener('click', () => showView('menu'));
+  document.getElementById('btn-start-match').addEventListener('click', startMatch);
   document.getElementById('btn-back-menu-game').addEventListener('click', () => showView('menu'));
   document.getElementById('btn-back-settings').addEventListener('click', () => showView('menu'));
 
+  fetch('data/cards.json').then(r => r.json()).then(d => { cardsData = d; });
   loadDecks();
   renderDeckList();
   showView('menu');
@@ -97,17 +103,139 @@ function saveDeck() {
 }
 
 function startSingleplayer() {
-  if (decks.length === 0) {
-    alert('Devi creare almeno un mazzo');
-    showView('decks');
+  if (decks.length < 2) {
+    if (decks.length === 0) {
+      alert('Devi creare almeno un mazzo');
+      showView('decks');
+    } else {
+      alert('Servono almeno due mazzi per giocare');
+    }
     return;
   }
-  const deck = decks[0];
-  initGameWithDeck(deck);
+  populateDeckSelects();
+  showView('select');
+}
+
+function populateDeckSelects() {
+  const sel1 = document.getElementById('select-deck1');
+  const sel2 = document.getElementById('select-deck2');
+  sel1.innerHTML = '';
+  sel2.innerHTML = '';
+  decks.forEach((d, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `Mazzo ${i + 1}`;
+    sel1.appendChild(opt);
+    sel2.appendChild(opt.cloneNode(true));
+  });
+}
+
+function startMatch() {
+  const i1 = parseInt(document.getElementById('select-deck1').value);
+  const i2 = parseInt(document.getElementById('select-deck2').value);
+  initGameWithDecks(decks[i1], decks[i2]);
   showView('game');
 }
 
 // hook for real game logic
-function initGameWithDeck(deck) {
-  console.log('Avvio partita con mazzo:', deck);
+function initGameWithDecks(deck1, deck2) {
+  console.log('Avvio partita con mazzi:', deck1, deck2);
+  gameState = {
+    round: 1,
+    players: [createPlayer(deck1), createPlayer(deck2)]
+  };
+  renderGame();
+}
+
+function createPlayer(deck) {
+  return {
+    deck: deck.map(id => Object.assign({used:false}, cardsData.find(c => c.id === id))),
+    life: 12,
+    pillz: 12
+  };
+}
+
+function renderGame() {
+  const area = document.querySelector('.game-area');
+  area.innerHTML = '';
+  const info = document.createElement('div');
+  info.textContent = `Round ${gameState.round} - P1 Vita ${gameState.players[0].life} (Pillz ${gameState.players[0].pillz}) vs P2 Vita ${gameState.players[1].life} (Pillz ${gameState.players[1].pillz})`;
+  area.appendChild(info);
+
+  if (gameState.round > 4 || gameState.players[0].life <= 0 || gameState.players[1].life <= 0) {
+    const winner = gameState.players[0].life === gameState.players[1].life ? 'Pareggio' : (gameState.players[0].life > gameState.players[1].life ? 'Giocatore 1' : 'Giocatore 2');
+    const end = document.createElement('div');
+    end.textContent = `Partita finita! Vince: ${winner}`;
+    area.appendChild(end);
+    return;
+  }
+
+  const sel = document.createElement('div');
+  sel.className = 'round-select';
+
+  gameState.players.forEach((p, idx) => {
+    const col = document.createElement('div');
+    col.className = 'player-col';
+    const h = document.createElement('h3');
+    h.textContent = `Giocatore ${idx + 1}`;
+    col.appendChild(h);
+    const ul = document.createElement('ul');
+    ul.className = 'hand';
+    p.deck.forEach((card, i) => {
+      if (!card.used) {
+        const li = document.createElement('li');
+        const btn = document.createElement('button');
+        btn.textContent = `${card.nome} (P:${card.potenza} D:${card.danno})`;
+        btn.addEventListener('click', () => selectCard(idx, i));
+        li.appendChild(btn);
+        ul.appendChild(li);
+      }
+    });
+    col.appendChild(ul);
+    sel.appendChild(col);
+  });
+
+  area.appendChild(sel);
+}
+
+function selectCard(playerIndex, cardIndex) {
+  const player = gameState.players[playerIndex];
+  const maxPillz = player.pillz;
+  const pillz = parseInt(prompt(`Pillz da usare (0-${maxPillz})`));
+  if (isNaN(pillz) || pillz < 0 || pillz > maxPillz) return;
+  player.selected = {index: cardIndex, pillz};
+  if (gameState.players.every(p => p.selected)) {
+    resolveRound();
+  } else {
+    renderGame();
+  }
+}
+
+function resolveRound() {
+  const p1 = gameState.players[0];
+  const p2 = gameState.players[1];
+  const c1 = p1.deck[p1.selected.index];
+  const c2 = p2.deck[p2.selected.index];
+  const atk1 = c1.potenza * (p1.selected.pillz + 1);
+  const atk2 = c2.potenza * (p2.selected.pillz + 1);
+  p1.pillz -= p1.selected.pillz;
+  p2.pillz -= p2.selected.pillz;
+
+  let winner;
+  if (atk1 > atk2) {
+    winner = 0;
+    p2.life -= c1.danno;
+  } else if (atk2 > atk1) {
+    winner = 1;
+    p1.life -= c2.danno;
+  } else {
+    winner = Math.random() < 0.5 ? 0 : 1;
+    if (winner === 0) p2.life -= c1.danno; else p1.life -= c2.danno;
+  }
+  c1.used = true;
+  c2.used = true;
+  delete p1.selected;
+  delete p2.selected;
+  gameState.round++;
+  renderGame();
 }
