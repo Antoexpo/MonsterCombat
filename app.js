@@ -8,6 +8,10 @@ let selectingSlot = null;
 let cardsData = [];
 let gameState = null;
 
+function cardImage(card) {
+  return `assets/cards/${card.immagine || 'placeholder.png'}`;
+}
+
 function cardInfo(card) {
   return `${card.nome} - Potenza ${card.potenza}, Danno ${card.danno}, Abilità: ${card['abilità']}, Clan: ${card.clan}, Bonus: ${card.bonus}, Stelle: ${card.star}`;
 }
@@ -89,7 +93,7 @@ function openEditor(index) {
     if (id) {
       const card = cardsData.find(c => c.id === id);
       const img = document.createElement('img');
-      img.src = 'assets/cards/placeholder.png';
+      img.src = cardImage(card);
       img.alt = card.nome;
       slot.appendChild(img);
       slot.title = cardInfo(card);
@@ -108,7 +112,7 @@ function selectCardForSlot(i) {
   cardsData.forEach(card => {
     const li = document.createElement('li');
     const img = document.createElement('img');
-    img.src = 'assets/cards/placeholder.png';
+    img.src = cardImage(card);
     img.alt = card.nome;
     const name = document.createElement('span');
     name.textContent = card.nome;
@@ -220,7 +224,7 @@ function renderGame() {
         const li = document.createElement('li');
         const btn = document.createElement('button');
         const img = document.createElement('img');
-        img.src = 'assets/cards/placeholder.png';
+        img.src = cardImage(card);
         img.alt = card.nome;
         const label = document.createElement('span');
         label.textContent = `${card.nome} (P:${card.potenza} D:${card.danno})`;
