@@ -8,6 +8,98 @@ let selectingSlot = null;
 let cardsData = [];
 let gameState = null;
 
+// dati di fallback delle carte nel caso il file JSON non sia disponibile
+const DEFAULT_CARDS = [
+  {
+    id: 1,
+    nome: "Drakor",
+    potenza: 6,
+    danno: 4,
+    "abilità": "Annulla Bonus Avv.",
+    clan: "Fiamma Nera",
+    bonus: "+2 Danno",
+    star: 3,
+    immagine: "drakor.png",
+  },
+  {
+    id: 2,
+    nome: "Aquora",
+    potenza: 5,
+    danno: 5,
+    "abilità": "Rigenera 1 Vita",
+    clan: "Onda Blu",
+    bonus: "+1 Potenza",
+    star: 3,
+    immagine: "aquora.png",
+  },
+  {
+    id: 3,
+    nome: "Terron",
+    potenza: 7,
+    danno: 3,
+    "abilità": "Scudo: Riduce danno 2",
+    clan: "Grotta Verde",
+    bonus: "+1 Vita",
+    star: 4,
+    immagine: "terron.png",
+  },
+  {
+    id: 4,
+    nome: "Zephral",
+    potenza: 4,
+    danno: 6,
+    "abilità": "Veloce: +1 Pillz gratis",
+    clan: "Vento Argento",
+    bonus: "+1 Pillz",
+    star: 3,
+    immagine: "zephral.png",
+  },
+  {
+    id: 5,
+    nome: "Umbra",
+    potenza: 8,
+    danno: 2,
+    "abilità": "Furtivo: infligge danno extra se ultimo round",
+    clan: "Ombra Viola",
+    bonus: "+2 Potenza tardo round",
+    star: 4,
+    immagine: "umbra.png",
+  },
+  {
+    id: 6,
+    nome: "Solarius",
+    potenza: 3,
+    danno: 7,
+    "abilità": "Irradia: 1 danno a tutte carte IA",
+    clan: "Sole Dorato",
+    bonus: "+1 Danno area",
+    star: 4,
+    immagine: "solarius.png",
+  },
+  {
+    id: 7,
+    nome: "Frostine",
+    potenza: 5,
+    danno: 5,
+    "abilità": "Congela: l'IA spende -1 Pillz next",
+    clan: "Ghiaccio Celeste",
+    bonus: "+1 Pillz ritardo",
+    star: 3,
+    immagine: "frostine.png",
+  },
+  {
+    id: 8,
+    nome: "Terrax",
+    potenza: 9,
+    danno: 1,
+    "abilità": "Terremoto: -1 Vita a tutti",
+    clan: "Terra Rossa",
+    bonus: "+1 Vita area",
+    star: 5,
+    immagine: "terrax.png",
+  },
+];
+
 function cardImage(card) {
   return `assets/cards/${card.immagine || 'placeholder.png'}`;
 }
@@ -43,10 +135,24 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-back-settings').addEventListener('click', () => showView('menu'));
 
   document.getElementById('btn-back-cardselect').addEventListener('click', () => openEditor(editingIndex));
-  fetch('data/cards.json').then(r => r.json()).then(d => { cardsData = d; });
-  loadDecks();
-  renderDeckList();
-  showView('menu');
+
+  function initApp() {
+    loadDecks();
+    renderDeckList();
+    showView('menu');
+  }
+
+  fetch('data/cards.json')
+    .then(r => r.json())
+    .then(d => {
+      cardsData = d;
+      initApp();
+    })
+    .catch(err => {
+      console.error('Impossibile caricare data/cards.json, uso dati di fallback', err);
+      cardsData = DEFAULT_CARDS;
+      initApp();
+    });
 });
 
 function showView(name) {
