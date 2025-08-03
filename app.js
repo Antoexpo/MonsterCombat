@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-back-menu-game').addEventListener('click', () => showView('menu'));
   document.getElementById('btn-back-settings').addEventListener('click', () => showView('menu'));
 
-  document.getElementById('btn-back-cardselect').addEventListener('click', () => openEditor(editingIndex));
+  document.getElementById('btn-back-cardselect').addEventListener('click', () => openEditor());
 
   function initApp() {
     loadDecks();
@@ -190,8 +190,11 @@ function renderDeckList() {
 
 function openEditor(index) {
   showView('editor');
-  editingIndex = index;
-  editingDeck = index != null ? [...decks[index]] : [null,null,null,null];
+  if (index !== undefined) {
+    editingIndex = index;
+    editingDeck = index != null ? [...decks[index]] : [null, null, null, null];
+  }
+  if (!editingDeck) editingDeck = [null, null, null, null];
   const slots = document.querySelectorAll('#deck-cards li');
   slots.forEach((slot,i) => {
     slot.innerHTML = '';
@@ -227,7 +230,7 @@ function selectCardForSlot(i) {
     li.title = cardInfo(card);
     li.addEventListener('click', () => {
       editingDeck[selectingSlot] = Number(card.id);
-      openEditor(editingIndex);
+      openEditor();
     });
     list.appendChild(li);
   });
