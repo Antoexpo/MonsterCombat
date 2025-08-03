@@ -90,8 +90,8 @@ function openEditor(index) {
   slots.forEach((slot,i) => {
     slot.innerHTML = '';
     const id = editingDeck[i];
-    if (id) {
-      const card = cardsData.find(c => c.id === id);
+    if (id != null) {
+      const card = cardsData.find(c => Number(c.id) === Number(id));
       const img = document.createElement('img');
       img.src = cardImage(card);
       img.alt = card.nome;
@@ -120,7 +120,7 @@ function selectCardForSlot(i) {
     li.appendChild(name);
     li.title = cardInfo(card);
     li.addEventListener('click', () => {
-      editingDeck[selectingSlot] = card.id;
+      editingDeck[selectingSlot] = Number(card.id);
       openEditor(editingIndex);
     });
     list.appendChild(li);
@@ -187,7 +187,12 @@ function initGameWithDecks(deck1, deck2) {
 
 function createPlayer(deck) {
   return {
-    deck: deck.map(id => Object.assign({used:false}, cardsData.find(c => c.id === id))),
+    deck: deck.map(id =>
+      Object.assign(
+        {used:false},
+        cardsData.find(c => Number(c.id) === Number(id))
+      )
+    ),
     life: 12,
     pillz: 12
   };
